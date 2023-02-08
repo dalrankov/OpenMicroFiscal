@@ -1,6 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Xml;
 using OpenMicroFiscal.Extensions;
 using OpenMicroFiscal.Models;
 
@@ -144,12 +145,18 @@ public sealed class InvoiceService
             .PostAsync("fs-v1", httpRequest, cancellationToken)
             .ConfigureAwait(false);
 
+        var responseXmlText = await httpResult.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var responseXmlDocument = new XmlDocument();
+        responseXmlDocument.LoadXml(responseXmlText);
+
+        var responseBodyElement = responseXmlDocument.DocumentElement!["env:Body"]!;
+        
         if (!httpResult.IsSuccessStatusCode)
             return new CreateInvoiceResult
             {
                 IsSuccessful = false,
                 InvoiceNumber = request.Invoice.Number,
-                ErrorResponseText = await httpResult.Content.ReadAsStringAsync().ConfigureAwait(false)
+                ErrorMessage = responseBodyElement["env:Fault"]!["faultstring"]!.InnerText
             };
 
         var urlQueryParams = new Dictionary<string, object>
@@ -170,7 +177,9 @@ public sealed class InvoiceService
         {
             IsSuccessful = true,
             InvoiceNumber = request.Invoice.Number,
-            Url = $"{UriProvider.GetInvoiceVerificationUri(_settings.Environment)}ic/#/verify?{queryString}"
+            Iic = iicHashText,
+            Fic = responseBodyElement["RegisterInvoiceResponse"]!["FIC"]!.InnerText,
+            VerificationUrl = $"{UriProvider.GetInvoiceVerificationUri(_settings.Environment)}ic/#/verify?{queryString}"
         };
     }
 
