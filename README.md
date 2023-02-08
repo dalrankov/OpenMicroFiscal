@@ -116,11 +116,12 @@ var invoiceService = new InvoiceService(
 ### Upotreba
 
 ````csharp
-var request = new CreateInvoiceRequest(
-    15,
-    PaymentMethodType.BankTransfer,
-    new DateOnly(2022, 02, 25),
-    new Buyer
+var request = new CreateInvoiceRequest
+{
+    OrderNumber = 15,
+    PaymentMethod = PaymentMethodType.BankTransfer,
+    PaymentDeadline = new DateTime(2022, 02, 25),
+    Buyer = new Buyer
     {
         IdType = "TIN",
         IdNumber = "12345678",
@@ -129,7 +130,7 @@ var request = new CreateInvoiceRequest(
         City = "PODGORICA",
         Country = "MNE"
     },
-    new []
+    Items = new[]
     {
         new InvoiceItem
         {
@@ -147,10 +148,15 @@ var request = new CreateInvoiceRequest(
             VatPercentage = 7.00M
         }
     },
-    "Molimo vas da račun platite u navedenom roku. Hvala.");
+    Note = "Molimo vas da račun platite u navedenom roku. Hvala."
+};
 
-var result = await invoiceService.CreateInvoiceAsync(request, cancellationToken);
+var result = await invoiceService.CreateInvoiceAsync(request);
 
-var invoiceNumber = result.Number;
-var invoiceUrl = result.Url;
+Console.WriteLine($"Invoice Number: {result.InvoiceNumber}");
+Console.WriteLine($"Total Price: {result.TotalPrice} EUR");
+Console.WriteLine($"IIC: {result.Iic}");
+Console.WriteLine($"FIC: {result.Fic}");
+Console.WriteLine($"Date and time: {result.CreatedAt}");
+Console.WriteLine($"Verification URL: {result.VerificationUrl}");
 ````
