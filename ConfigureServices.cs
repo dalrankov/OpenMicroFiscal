@@ -23,8 +23,8 @@ public static class ConfigureServices
 
         services.AddHttpClient(HttpClientName, (serviceProvider, httpClient) =>
         {
-            var fiscalizationSettings = serviceProvider.GetRequiredService<FiscalizationSettings>();
-            httpClient.BaseAddress = UriProvider.GetInvoiceFiscalizationUri(fiscalizationSettings.Environment);
+            var settings = serviceProvider.GetRequiredService<FiscalizationSettings>();
+            httpClient.BaseAddress = UriProvider.GetInvoiceFiscalizationUri(settings.Environment);
         });
 
         services.AddTransient<InvoiceService>(serviceProvider =>
