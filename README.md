@@ -24,6 +24,8 @@ Sva pitanja/probleme/predloge slati na: `kontakt@novialgoritam.me`
 
 ## Kako se koristi biblioteka?
 
+Testni sertifikat možete pronaći u folder `test-certs` pod nazivom `test.pfx`. Lozinka je `123456`.
+
 ### Registracija servisa
 
 #### Dependency Injection kroz konfiguraciju
