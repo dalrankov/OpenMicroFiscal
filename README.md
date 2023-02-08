@@ -24,11 +24,13 @@ Sva pitanja/probleme/predloge slati na: `kontakt@novialgoritam.me`
 
 ## Kako se koristi biblioteka?
 
-Testni sertifikat možete pronaći u folder `test-certs` pod nazivom `test.pfx`. Lozinka je `123456`.
+Testni sertifikat možete pronaći u folderu `test-certs` pod nazivom `test.pfx`. Lozinka je `123456`.
 
 ### Registracija servisa
 
-#### Dependency Injection kroz konfiguraciju
+Postoje tri načina da registrujete servis za fiskalizaciju.
+
+#### 1. Dependency Injection kroz konfiguraciju
 
 Popunite sljedeće varijable kroz vašu konfiguraciju (`IConfiguration` interfejs).
 
@@ -57,7 +59,7 @@ services.AddFiscalization(_ => () => new X509Certificate2("test.pfx", "123456"))
 
 Nakon ovoga je uspješno registrovan servis tipa `InvoiceService`, spreman za upotrebu.
 
-#### Dependency Injection sa direktnim predavanjem podešavanja
+#### 2. Dependency Injection sa direktnim predavanjem podešavanja
 
 Ovdje direktno unosite podatke kroz instancu klase `FiscalizationSettings` i predajete implementaciju delegate-a za instanciranje sertifikata.
 
@@ -83,7 +85,7 @@ services.AddFiscalization(
 
 Nakon ovoga je uspješno registrovan servis tipa `InvoiceService`, spreman za upotrebu.
 
-#### Ručno
+#### 3. Ručno
 
 Klasa `InvoiceService` je dizajnirana tako da se može instancirati po potrebi, bez upotrebe Dependency Injection-a.
 
