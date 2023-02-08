@@ -3,7 +3,7 @@
 namespace OpenMicroFiscal.Models;
 
 [XmlType("RegisterInvoiceRequest")]
-internal sealed class FiscalizationRequest
+public sealed class FiscalizationRequest
 {
     [XmlAttribute("Id")] public string Id { get; set; }
     [XmlAttribute("Version")] public int Version { get; set; }

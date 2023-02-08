@@ -3,7 +3,7 @@
 namespace OpenMicroFiscal.Models;
 
 [XmlType("Header")]
-internal sealed class FiscalizationHeader
+public sealed class FiscalizationHeader
 {
     [XmlAttribute("UUID")] public Guid Uuid { get; set; }
     [XmlAttribute("SendDateTime")] public DateTime SentAt { get; set; }

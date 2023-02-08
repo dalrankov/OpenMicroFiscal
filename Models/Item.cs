@@ -3,7 +3,7 @@
 namespace OpenMicroFiscal.Models;
 
 [XmlType("I")]
-internal sealed class Item
+public sealed class Item
 {
     [XmlAttribute("N")] public string Name { get; set; }
     [XmlAttribute("U")] public string Unit { get; set; }

@@ -2,7 +2,7 @@ using System.Xml.Serialization;
 
 namespace OpenMicroFiscal.Models;
 
-internal enum InvoiceType
+public enum InvoiceType
 {
     [XmlEnum("INVOICE")] Invoice
 }

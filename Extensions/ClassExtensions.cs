@@ -14,7 +14,7 @@ internal static class ClassExtensions
         using var memoryStream = new MemoryStream();
         using TextWriter streamWriter = new StreamWriter(memoryStream);
         
-        var xmlSerializer = new XmlSerializer(typeof(FiscalizationRequest), defaultNamespace);
+        var xmlSerializer = new XmlSerializer(typeof(T), defaultNamespace);
         xmlSerializer.Serialize(streamWriter, instance);
         
         var xmlDocument = new XmlDocument();

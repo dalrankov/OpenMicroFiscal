@@ -3,7 +3,7 @@
 namespace OpenMicroFiscal.Models;
 
 [XmlType("Invoice")]
-internal sealed class Invoice
+public sealed class Invoice
 {
     [XmlAttribute("InvType")] public InvoiceType Type { get; set; }
     [XmlAttribute("TypeOfInv")] public TypeOfInvoice TypeOfInvoice { get; set; }
