@@ -101,7 +101,7 @@ public sealed class InvoiceService
                 BankNumber = _settings.IssuerBankNumber,
                 PayDeadline = createInvoiceRequest.PaymentDeadline.ToString("yyyy-MM-dd"),
                 TotalPriceToPay = totalPrice,
-                TaxFreeAmount = totalPrice,
+                TaxFreeAmount = totalPrice - totalVatAmount,
                 PaymentMethods = new List<PaymentMethod>
                 {
                     new()
