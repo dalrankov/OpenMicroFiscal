@@ -155,8 +155,11 @@ public sealed class InvoiceService
             return new CreateInvoiceResult
             {
                 IsSuccessful = false,
+                ErrorMessage = responseBodyElement["env:Fault"]!["faultstring"]!.InnerText,
                 InvoiceNumber = request.Invoice.Number,
-                ErrorMessage = responseBodyElement["env:Fault"]!["faultstring"]!.InnerText
+                Iic = iicHashText,
+                TotalPrice = totalPrice,
+                CreatedAt = currentDateTime
             };
 
         var urlQueryParams = new Dictionary<string, object>
@@ -176,10 +179,12 @@ public sealed class InvoiceService
         return new CreateInvoiceResult
         {
             IsSuccessful = true,
+            Fic = responseBodyElement["RegisterInvoiceResponse"]!["FIC"]!.InnerText,
+            VerificationUrl = $"{UriProvider.GetInvoiceVerificationUri(_settings.Environment)}ic/#/verify?{queryString}",
             InvoiceNumber = request.Invoice.Number,
             Iic = iicHashText,
-            Fic = responseBodyElement["RegisterInvoiceResponse"]!["FIC"]!.InnerText,
-            VerificationUrl = $"{UriProvider.GetInvoiceVerificationUri(_settings.Environment)}ic/#/verify?{queryString}"
+            TotalPrice = totalPrice,
+            CreatedAt = currentDateTime
         };
     }
 
