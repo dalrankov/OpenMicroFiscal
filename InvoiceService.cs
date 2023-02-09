@@ -30,31 +30,29 @@ public sealed class InvoiceService
         var invoiceItems = createInvoiceRequest.Items
             .Select(item =>
             {
-                const decimal defaultVatPercentage = 21.00M;
+                const decimal defaultVatPercentage = 21.0000M;
                 
                 var resultItem = new Item
                 {
                     Name = item.Name,
                     Unit = item.Unit,
-                    UnitPrice = item.UnitPrice,
+                    UnitPrice = item.UnitPrice.RoundTo(4),
                     Quantity = item.Quantity,
-                    TotalPriceBeforeVat = item.UnitPrice * item.Quantity,
-                    VatPercentage = item.VatPercentage ?? defaultVatPercentage
+                    VatPercentage = item.VatPercentage?.RoundTo(4) ?? defaultVatPercentage
                 };
-
-                var unitPriceAfterVat = item.UnitPrice + item.UnitPrice * 0.01M * resultItem.VatPercentage;
-                resultItem.UnitPriceAfterVat = Math.Round(unitPriceAfterVat, 2, MidpointRounding.AwayFromZero);
-
-                resultItem.TotalPriceAfterVat = resultItem.UnitPriceAfterVat * item.Quantity;
-                resultItem.TotalVatAmount = resultItem.TotalPriceAfterVat - resultItem.TotalPriceBeforeVat;
+                
+                resultItem.UnitPriceAfterVat = resultItem.UnitPrice.IncreaseBy(resultItem.VatPercentage).RoundTo(4);
+                resultItem.TotalPriceBeforeVat = (resultItem.UnitPrice * resultItem.Quantity).RoundTo(4);
+                resultItem.TotalPriceAfterVat = (resultItem.UnitPriceAfterVat * resultItem.Quantity).RoundTo(4);
+                resultItem.TotalVatAmount = (resultItem.TotalPriceAfterVat - resultItem.TotalPriceBeforeVat).RoundTo(4);
 
                 return resultItem;
             })
             .ToList();
 
-        var totalPrice = invoiceItems.Sum(i => i.TotalPriceAfterVat);
-        var totalVatAmount = invoiceItems.Sum(i => i.TotalVatAmount);
-        var totalPriceWithoutVat = invoiceItems.Sum(i => i.TotalPriceBeforeVat);
+        var totalPrice = invoiceItems.Sum(i => i.TotalPriceAfterVat).RoundTo(2);
+        var totalVatAmount = invoiceItems.Sum(i => i.TotalVatAmount).RoundTo(2);
+        var totalPriceWithoutVat = invoiceItems.Sum(i => i.TotalPriceBeforeVat).RoundTo(2);
 
         var currentDateTime = DateTime.UtcNow.WithoutSeconds();
 
@@ -125,9 +123,9 @@ public sealed class InvoiceService
                     .GroupBy(item => item.VatPercentage)
                     .Select(vatPercentageGroup => new SameTax
                     {
-                        VatPercentage = vatPercentageGroup.Key,
-                        VatAmount = vatPercentageGroup.Sum(x => x.TotalVatAmount),
-                        PriceBeforeVat = vatPercentageGroup.Sum(x => x.TotalPriceBeforeVat),
+                        VatPercentage = vatPercentageGroup.Key.RoundTo(2),
+                        VatAmount = vatPercentageGroup.Sum(x => x.TotalVatAmount).RoundTo(2),
+                        PriceBeforeVat = vatPercentageGroup.Sum(x => x.TotalPriceBeforeVat).RoundTo(2),
                         TotalItems = vatPercentageGroup.Sum(x => x.Quantity)
                     })
                     .ToList()
@@ -171,7 +169,7 @@ public sealed class InvoiceService
             ["bu"] = _settings.IssuerBusinessUnitCode,
             ["cr"] = _settings.IssuerEnuCode,
             ["sw"] = _settings.IssuerSoftwareCode,
-            ["prc"] = totalPrice
+            ["prc"] = totalPrice.ToFormattedString(2)
         };
 
         var queryString = string.Join("&", urlQueryParams.Select(p => $"{p.Key}={p.Value}"));
@@ -201,7 +199,7 @@ public sealed class InvoiceService
             _settings.IssuerBusinessUnitCode,
             _settings.IssuerEnuCode,
             _settings.IssuerSoftwareCode,
-            totalPrice);
+            totalPrice.ToFormattedString(2));
 
         var iicSignatureBytes = certificate
             .GetRSAPrivateKey()!
