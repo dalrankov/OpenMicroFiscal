@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
@@ -28,23 +27,24 @@ public sealed class InvoiceService
         CreateInvoiceRequest createInvoiceRequest,
         CancellationToken cancellationToken = default)
     {
-        const decimal defaultVatPercentage = 21.0000M;
-        
         var invoiceItems = createInvoiceRequest.Items
-            .Select(inputItem => new Item
+            .Select(item =>
             {
-                Name = inputItem.Name,
-                Unit = inputItem.Unit,
-                UnitPrice = inputItem.UnitPrice.RoundTo(4),
-                Quantity = inputItem.Quantity,
-                VatPercentage = inputItem.VatPercentage?.RoundTo(4) ?? defaultVatPercentage
-            })
-            .Select(resultItem =>
-            {
+                const decimal defaultVatPercentage = 21.0000M;
+                
+                var resultItem = new Item
+                {
+                    Name = item.Name,
+                    Unit = item.Unit,
+                    UnitPrice = item.UnitPrice.RoundTo(4),
+                    Quantity = item.Quantity,
+                    VatPercentage = item.VatPercentage?.RoundTo(4) ?? defaultVatPercentage
+                };
+                
                 resultItem.UnitPriceAfterVat = resultItem.UnitPrice.IncreaseBy(resultItem.VatPercentage).RoundTo(4);
-                resultItem.TotalPriceBeforeVat = resultItem.UnitPrice * resultItem.Quantity;
-                resultItem.TotalPriceAfterVat = resultItem.UnitPriceAfterVat * resultItem.Quantity;
-                resultItem.TotalVatAmount = resultItem.TotalPriceAfterVat - resultItem.TotalPriceBeforeVat;
+                resultItem.TotalPriceBeforeVat = (resultItem.UnitPrice * resultItem.Quantity).RoundTo(4);
+                resultItem.TotalPriceAfterVat = (resultItem.UnitPriceAfterVat * resultItem.Quantity).RoundTo(4);
+                resultItem.TotalVatAmount = (resultItem.TotalPriceAfterVat - resultItem.TotalPriceBeforeVat).RoundTo(4);
 
                 return resultItem;
             })
@@ -169,7 +169,7 @@ public sealed class InvoiceService
             ["bu"] = _settings.IssuerBusinessUnitCode,
             ["cr"] = _settings.IssuerEnuCode,
             ["sw"] = _settings.IssuerSoftwareCode,
-            ["prc"] = totalPrice.ToString("0.00", CultureInfo.InvariantCulture)
+            ["prc"] = totalPrice.ToFormattedString(2)
         };
 
         var queryString = string.Join("&", urlQueryParams.Select(p => $"{p.Key}={p.Value}"));
@@ -199,7 +199,7 @@ public sealed class InvoiceService
             _settings.IssuerBusinessUnitCode,
             _settings.IssuerEnuCode,
             _settings.IssuerSoftwareCode,
-            totalPrice.ToString("0.00", CultureInfo.InvariantCulture));
+            totalPrice.ToFormattedString(2));
 
         var iicSignatureBytes = certificate
             .GetRSAPrivateKey()!
