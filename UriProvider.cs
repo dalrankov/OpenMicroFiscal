@@ -19,7 +19,7 @@ internal static class UriProvider
             _ => throw new ArgumentOutOfRangeException(nameof(environment))
         };
     }
-    
+
     public static Uri GetInvoiceVerificationUri(FiscalizationEnvironment environment)
     {
         return environment switch

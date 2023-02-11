@@ -31,7 +31,7 @@ public sealed class InvoiceService
             .Select(item =>
             {
                 const decimal defaultVatPercentage = 21.0000M;
-                
+
                 var resultItem = new Item
                 {
                     Name = item.Name,
@@ -40,7 +40,7 @@ public sealed class InvoiceService
                     Quantity = item.Quantity,
                     VatPercentage = item.VatPercentage?.RoundTo(4) ?? defaultVatPercentage
                 };
-                
+
                 resultItem.UnitPriceAfterVat = resultItem.UnitPrice.IncreaseBy(resultItem.VatPercentage).RoundTo(4);
                 resultItem.TotalPriceBeforeVat = (resultItem.UnitPrice * resultItem.Quantity).RoundTo(4);
                 resultItem.TotalPriceAfterVat = (resultItem.UnitPriceAfterVat * resultItem.Quantity).RoundTo(4);
@@ -54,16 +54,16 @@ public sealed class InvoiceService
         var totalVatAmount = invoiceItems.Sum(i => i.TotalVatAmount).RoundTo(2);
         var totalPriceWithoutVat = invoiceItems.Sum(i => i.TotalPriceBeforeVat).RoundTo(2);
 
-        var currentDateTime = DateTime.UtcNow.WithoutSeconds();
+        var currentDateTime = DateTime.UtcNow.WithoutMilliseconds();
 
         using var certificate = _provideCertificate();
 
         var (iicSignatureText, iicHashText) = ComputeIic(
-            createInvoiceRequest.OrderNumber, currentDateTime, totalPrice, certificate); 
-        
-        const string defaultRequestId = "Request"; 
-        const int defaultRequestVersion = 1; 
-        
+            createInvoiceRequest.OrderNumber, currentDateTime, totalPrice, certificate);
+
+        const string defaultRequestId = "Request";
+        const int defaultRequestVersion = 1;
+
         var request = new FiscalizationRequest
         {
             Id = defaultRequestId,
@@ -148,7 +148,7 @@ public sealed class InvoiceService
         responseXmlDocument.LoadXml(responseXmlText);
 
         var responseBodyElement = responseXmlDocument.DocumentElement!["env:Body"]!;
-        
+
         if (!httpResult.IsSuccessStatusCode)
             return new CreateInvoiceResult
             {
@@ -178,7 +178,8 @@ public sealed class InvoiceService
         {
             IsSuccessful = true,
             Fic = responseBodyElement["RegisterInvoiceResponse"]!["FIC"]!.InnerText,
-            VerificationUrl = $"{UriProvider.GetInvoiceVerificationUri(_settings.Environment)}ic/#/verify?{queryString}",
+            VerificationUrl =
+                $"{UriProvider.GetInvoiceVerificationUri(_settings.Environment)}ic/#/verify?{queryString}",
             InvoiceNumber = request.Invoice.Number,
             Iic = iicHashText,
             TotalPrice = totalPrice,

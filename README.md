@@ -14,10 +14,11 @@ Registarski podaci softvera:
 
 - Proizvođač/Održavaoc: `NOVI ALGORITAM DOO`
 - Naziv: `OpenMicroFiscal`
-- Verzija: `1.0.1`
-- Identifikator: `lf281wm877`
+- Verzija: `1.0.2`
+- Identifikator: `nh049rk588`
 
-> ❗Napomena: Kompanija NOVI ALGORITAM DOO ne upravlja direktno nijednom pokrenutom instancom ovog softvera nigdje na internetu
+> ❗Napomena: Kompanija NOVI ALGORITAM DOO ne upravlja direktno nijednom pokrenutom instancom ovog softvera nigdje na
+> internetu
 > niti odgovara za rad softvera u produkcionom okruženju.
 
 Sva pitanja/probleme/predloge slati na: `kontakt@novialgoritam.me`
@@ -51,7 +52,11 @@ FiscalizationSettings__IssuerBusinessUnitCode=xx123xx123
 FiscalizationSettings__IssuerOperatorCode=oo123oo123
 ````
 
-Zatim pozovite ekstenziju `AddFiscalization` koja će registrovati neophodne servise za fiskalizaciju. Ovdje ste dužni da predate implementaciju delegate-a koja kao rezultat vraća sertifikat. Kao parametar funkcije dostupna vam je instanca `IServiceProvider` interfejsa (koja je u ovom slučaju odbačena nazivom `_`) koja vam može pomoći u instanciranju sertifikata. Npr: Ukoliko sertifikat držite u konfiguraciji i želite odatle da ga ekstraktujete kako biste ga iskoristili ovdje. 
+Zatim pozovite ekstenziju `AddFiscalization` koja će registrovati neophodne servise za fiskalizaciju. Ovdje ste dužni da
+predate implementaciju delegate-a koja kao rezultat vraća sertifikat. Kao parametar funkcije dostupna vam je
+instanca `IServiceProvider` interfejsa (koja je u ovom slučaju odbačena nazivom `_`) koja vam može pomoći u
+instanciranju sertifikata. Npr: Ukoliko sertifikat držite u konfiguraciji i želite odatle da ga ekstraktujete kako biste
+ga iskoristili ovdje.
 
 ````csharp
 services.AddFiscalization(_ => () => new X509Certificate2("test.pfx", "123456"));
@@ -61,7 +66,8 @@ Nakon ovoga je uspješno registrovan servis tipa `InvoiceService`, spreman za up
 
 #### 2. Dependency Injection sa direktnim predavanjem podešavanja
 
-Ovdje direktno unosite podatke kroz instancu klase `FiscalizationSettings` i predajete implementaciju delegate-a za instanciranje sertifikata.
+Ovdje direktno unosite podatke kroz instancu klase `FiscalizationSettings` i predajete implementaciju delegate-a za
+instanciranje sertifikata.
 
 ````csharp
 services.AddFiscalization(
@@ -89,7 +95,8 @@ Nakon ovoga je uspješno registrovan servis tipa `InvoiceService`, spreman za up
 
 Klasa `InvoiceService` je dizajnirana tako da se može instancirati po potrebi, bez upotrebe Dependency Injection-a.
 
-> Ako koristite ovaj način instanciranja, vodite računa o instanci klase `HttpClient` koja mora biti dispose-ovana nakon upotrebe. Klasa `InvoiceService` to neće uraditi sama.
+> Ako koristite ovaj način instanciranja, vodite računa o instanci klase `HttpClient` koja mora biti dispose-ovana nakon
+> upotrebe. Klasa `InvoiceService` to neće uraditi sama.
 
 ````csharp
 using var httpClient = new HttpClient();

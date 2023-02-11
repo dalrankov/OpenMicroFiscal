@@ -2,7 +2,6 @@
 using System.Security.Cryptography.Xml;
 using System.Xml;
 using System.Xml.Linq;
-using OpenMicroFiscal.Models;
 
 namespace OpenMicroFiscal.Extensions;
 
@@ -52,9 +51,9 @@ internal static class XmlDocumentExtensions
         const string soapEnvelopeAttributeName = "soapenv";
         const string headerElementName = "Header";
         const string bodyElementName = "Body";
-        
-        var envelopeNamespace = (XNamespace)envelopeNamespaceUri;
-        
+
+        var envelopeNamespace = (XNamespace) envelopeNamespaceUri;
+
         var envelopeElement = new XElement(envelopeNamespace + envelopeElementName,
             new XAttribute(XNamespace.Xmlns + soapEnvelopeAttributeName, envelopeNamespace),
             new XElement(envelopeNamespace + headerElementName),
