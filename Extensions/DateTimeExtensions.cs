@@ -2,7 +2,7 @@
 
 internal static class DateTimeExtensions
 {
-    public static DateTime WithoutSeconds(this DateTime dateTime)
+    public static DateTime WithoutMilliseconds(this DateTime dateTime)
     {
         return new DateTime(
             dateTime.Year,
