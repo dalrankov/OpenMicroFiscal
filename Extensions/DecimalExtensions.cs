@@ -2,7 +2,7 @@
 
 namespace OpenMicroFiscal.Extensions;
 
-public static class DecimalExtensions
+internal static class DecimalExtensions
 {
     public static decimal RoundTo(this decimal value, int decimals)
     {
