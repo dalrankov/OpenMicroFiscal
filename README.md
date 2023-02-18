@@ -14,8 +14,8 @@ Registarski podaci softvera:
 
 - Proizvođač/Održavaoc: `NOVI ALGORITAM DOO`
 - Naziv: `OpenMicroFiscal`
-- Verzija: `1.0.2`
-- Identifikator: `nh049rk588`
+- Verzija: `1.0.3`
+- Identifikator: `hn076qk917`
 
 > ❗Napomena: Kompanija NOVI ALGORITAM DOO ne upravlja direktno nijednom pokrenutom instancom ovog softvera nigdje na
 > internetu
