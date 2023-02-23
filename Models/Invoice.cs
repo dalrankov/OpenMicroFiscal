@@ -16,7 +16,6 @@ public sealed class Invoice
     [XmlAttribute("TotVATAmt")] public decimal TotalVatAmount { get; set; }
     [XmlAttribute("TotPrice")] public decimal TotalPrice { get; set; }
     [XmlAttribute("TotPriceToPay")] public decimal TotalPriceToPay { get; set; }
-    [XmlAttribute("TaxFreeAmt")] public decimal TaxFreeAmount { get; set; }
     [XmlAttribute("OperatorCode")] public string OperatorCode { get; set; }
     [XmlAttribute("BusinUnitCode")] public string BusinessUnitCode { get; set; }
     [XmlAttribute("SoftCode")] public string SoftwareCode { get; set; }
