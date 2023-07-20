@@ -152,6 +152,7 @@ public sealed class InvoiceService
             return new CreateInvoiceResult
             {
                 IsSuccessful = false,
+                EnvelopedRequestXmlText = envelopedRequestXmlText,
                 ErrorMessage = responseBodyElement["env:Fault"]!["faultstring"]!.InnerText,
                 InvoiceNumber = request.Invoice.Number,
                 Iic = iicHashText,
@@ -176,6 +177,7 @@ public sealed class InvoiceService
         return new CreateInvoiceResult
         {
             IsSuccessful = true,
+            EnvelopedRequestXmlText = envelopedRequestXmlText,
             Fic = responseBodyElement["RegisterInvoiceResponse"]!["FIC"]!.InnerText,
             VerificationUrl =
                 $"{UriProvider.GetInvoiceVerificationUri(_settings.Environment)}ic/#/verify?{queryString}",
