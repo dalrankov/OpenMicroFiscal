@@ -12,9 +12,8 @@
 
         <Product>OpenMicroFiscal</Product>
         <PackageId>OpenMicroFiscal</PackageId>
-        <Company>NOVI ALGORITAM DOO</Company>
         <Authors>dalibor-rankovic</Authors>
-        <Copyright>Copyright © 2023 NOVI ALGORITAM DOO, 85340 HERCEG-NOVI, MONTENEGRO</Copyright>
+        <Copyright>© 2024 Dalibor Ranković</Copyright>
         <Description>.NET biblioteka za elektronsku fiskalizaciju računa u Crnoj Gori.</Description>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 
@@ -22,7 +21,7 @@
         <RepositoryUrl>https://github.com/dalrankov/OpenMicroFiscal</RepositoryUrl>
         <PackageProjectUrl>https://github.com/dalrankov/OpenMicroFiscal</PackageProjectUrl>
 
-        <PackageReleaseNotes>Prva verzija u kojoj je moguće fiskalizovati standardne račune.</PackageReleaseNotes>
+        <PackageReleaseNotes>Druga verzija u kojoj je moguće fiskalizovati standardne račune, sa izmijenjenom licencom.</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>

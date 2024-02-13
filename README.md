@@ -10,19 +10,6 @@ računom ili kreditnom/debitnom karticom firme.
 Pored toga što služi svrsi koja je nama konkretno potrebna, može biti i kvalitetna osnova drugima koji žele da
 implementiraju elektronsku fiskalizaciju u .NET-u.
 
-Registarski podaci softvera:
-
-- Proizvođač/Održavaoc: `NOVI ALGORITAM DOO`
-- Naziv: `OpenMicroFiscal`
-- Verzija: `1.0.5`
-- Identifikator: `ab747pq901`
-
-> ❗Napomena: Kompanija NOVI ALGORITAM DOO ne upravlja direktno nijednom pokrenutom instancom ovog softvera nigdje na
-> internetu
-> niti odgovara za rad softvera u produkcionom okruženju.
-
-Sva pitanja/probleme/predloge slati na: `kontakt@novialgoritam.me`
-
 ## Kako se koristi biblioteka?
 
 Testni sertifikat možete pronaći u folderu `test-certs` pod nazivom `test.pfx`. Lozinka je `123456`.
