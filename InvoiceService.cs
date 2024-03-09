@@ -37,8 +37,9 @@ public sealed class InvoiceService
                     Name = item.Name,
                     Unit = item.Unit,
                     UnitPrice = item.UnitPrice.RoundTo(4),
-                    Quantity = item.Quantity,
-                    VatPercentage = item.VatPercentage?.RoundTo(4) ?? defaultVatPercentage
+                    Quantity = item.Quantity.RoundTo(2),
+                    VatPercentage = item.Vat?.Rate.RoundTo(4) ?? defaultVatPercentage,
+                    VatExemptionReason = item.Vat?.ExemptionReason
                 };
 
                 resultItem.UnitPriceAfterVat = resultItem.UnitPrice.IncreaseBy(resultItem.VatPercentage).RoundTo(4);
@@ -75,7 +76,7 @@ public sealed class InvoiceService
             },
             Invoice = new Invoice
             {
-                Type = InvoiceType.Invoice,
+                Type = createInvoiceRequest.Type,
                 TypeOfInvoice = TypeOfInvoice.NonCash,
                 IssuedAt = currentDateTime,
                 Number = string.Join("/",
@@ -98,7 +99,7 @@ public sealed class InvoiceService
                 Note = createInvoiceRequest.Note,
                 BankNumber = _settings.IssuerBankNumber,
                 PayDeadline = createInvoiceRequest.PaymentDeadline.ToString("yyyy-MM-dd"),
-                TotalPriceToPay = totalPrice,
+                TotalPriceToPay = Math.Max(totalPrice, 0),
                 PaymentMethods = new List<PaymentMethod>
                 {
                     new()
@@ -119,15 +120,24 @@ public sealed class InvoiceService
                 Buyer = createInvoiceRequest.Buyer,
                 Items = invoiceItems,
                 SameTaxes = invoiceItems
-                    .GroupBy(item => item.VatPercentage)
+                    .GroupBy(item => new { item.VatPercentage, item.VatExemptionReason })
                     .Select(vatPercentageGroup => new SameTax
                     {
-                        VatPercentage = vatPercentageGroup.Key.RoundTo(2),
+                        VatPercentage = vatPercentageGroup.Key.VatPercentage.RoundTo(2),
                         VatAmount = vatPercentageGroup.Sum(x => x.TotalVatAmount).RoundTo(2),
                         PriceBeforeVat = vatPercentageGroup.Sum(x => x.TotalPriceBeforeVat).RoundTo(2),
-                        TotalItems = vatPercentageGroup.Count()
+                        TotalItems = vatPercentageGroup.Count(),
+                        VatExemptionReason = vatPercentageGroup.Key.VatExemptionReason
                     })
-                    .ToList()
+                    .ToList(),
+                CorrectiveInvoice = createInvoiceRequest is { Type: InvoiceType.Corrective, Original: not null }
+                    ? new CorrectiveInvoice
+                    {
+                        Type = CorrectiveInvoiceType.Corrective,
+                        ReferenceId = createInvoiceRequest.Original.Id,
+                        IssuedAt = createInvoiceRequest.Original.IssuedAt
+                    }
+                    : null
             }
         };
 

@@ -30,4 +30,5 @@ public sealed class Invoice
     [XmlElement("Buyer")] public Buyer Buyer { get; set; }
     [XmlArray("Items")] public List<Item> Items { get; set; }
     [XmlArray("SameTaxes")] public List<SameTax> SameTaxes { get; set; }
+    [XmlElement("CorrectiveInv")] public CorrectiveInvoice? CorrectiveInvoice { get; set; }
 }

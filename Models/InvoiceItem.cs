@@ -5,6 +5,12 @@ public sealed class InvoiceItem
     public string Name { get; set; }
     public string Unit { get; set; }
     public decimal UnitPrice { get; set; }
-    public int Quantity { get; set; }
-    public decimal? VatPercentage { get; set; }
+    public decimal Quantity { get; set; }
+    public VatSpec? Vat { get; set; }
+    
+    public sealed class VatSpec
+    {
+        public decimal Rate { get; set; }
+        public string? ExemptionReason { get; set; }
+    }
 }

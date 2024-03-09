@@ -9,4 +9,7 @@ public sealed class SameTax
     [XmlAttribute("PriceBefVAT")] public decimal PriceBeforeVat { get; set; }
     [XmlAttribute("VATRate")] public decimal VatPercentage { get; set; }
     [XmlAttribute("VATAmt")] public decimal VatAmount { get; set; }
+    [XmlAttribute("ExemptFromVAT")] public string? VatExemptionReason { get; set; }
+
+    public bool ShouldSerializeVatPercentage() => VatPercentage > 0;
 }

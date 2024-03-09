@@ -2,8 +2,7 @@ using System.Xml.Serialization;
 
 namespace OpenMicroFiscal.Models;
 
-public enum InvoiceType
+public enum CorrectiveInvoiceType
 {
-    [XmlEnum("INVOICE")] Invoice,
     [XmlEnum("CORRECTIVE")] Corrective
 }

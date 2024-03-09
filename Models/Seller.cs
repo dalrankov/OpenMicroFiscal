@@ -5,7 +5,7 @@ namespace OpenMicroFiscal.Models;
 [XmlType("Seller")]
 public sealed class Seller
 {
-    [XmlAttribute("IDType")] public string IdType { get; set; }
+    [XmlAttribute("IDType")] public TaxIdType IdType { get; set; }
     [XmlAttribute("IDNum")] public string IdNumber { get; set; }
     [XmlAttribute("Name")] public string Name { get; set; }
     [XmlAttribute("Country")] public string Country { get; set; }

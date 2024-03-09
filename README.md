@@ -4,10 +4,10 @@
 <a href="https://www.nuget.org/packages/OpenMicroFiscal"><img alt="NuGet Downloads" src="https://img.shields.io/nuget/dt/OpenMicroFiscal"></a>
 
 Softver namijenjen za elektronsku fiskalizaciju računa pravnih lica u PDV sistemu unutar Crne Gore.
-Implementacija je minimalistička i služi za izdavanje računa ka pravnim licima (biznisima) koji plaćaju transakcionim
+Implementacija je minimalistička i služi za izdavanje/storniranje računa ka pravnim licima (biznisima) koji plaćaju transakcionim
 računom ili kreditnom/debitnom karticom firme.
 
-Pored toga što služi svrsi koja je nama konkretno potrebna, može biti i kvalitetna osnova drugima koji žele da
+Pored toga što služi svrsi koja je meni konkretno potrebna, može biti i kvalitetna osnova drugima koji žele da
 implementiraju elektronsku fiskalizaciju u .NET-u.
 
 ## Kako se koristi biblioteka?
@@ -61,7 +61,7 @@ services.AddFiscalization(
     new FiscalizationSettings
     {
         Environment = FiscalizationEnvironment.Test,
-        IssuerIdType = "TIN",
+        IssuerIdType = TaxIdType.Tin,
         IssuerIdNumber = "12345678",
         IssuerName = "TEST DOO",
         IssuerCountry = "MNE",
@@ -94,7 +94,7 @@ var invoiceService = new InvoiceService(
     new FiscalizationSettings
     {
         Environment = FiscalizationEnvironment.Test,
-        IssuerIdType = "TIN",
+        IssuerIdType = TaxIdType.Tin,
         IssuerIdNumber = "12345678",
         IssuerName = "TEST DOO",
         IssuerCountry = "MNE",
@@ -116,12 +116,13 @@ var invoiceService = new InvoiceService(
 ````csharp
 var request = new CreateInvoiceRequest
 {
+    Type = InvoiceType.Invoice,
     OrderNumber = 15,
     PaymentMethod = PaymentMethodType.BankTransfer,
     PaymentDeadline = new DateTime(2022, 02, 25),
     Buyer = new Buyer
     {
-        IdType = "TIN",
+        IdType = TaxIdType.Tin,
         IdNumber = "12345678",
         Name = "TOP BUYER DOO",
         Address = "4 JULA BB",
@@ -143,10 +144,41 @@ var request = new CreateInvoiceRequest
             Unit = "komad",
             UnitPrice = 5.00M,
             Quantity = 2,
-            VatPercentage = 7.00M
+            Vat = new InvoiceItem.VatDetails
+            {
+                Rate = 7.00M
+            }
+        },
+        ...
+        new InvoiceItem
+        {
+            Name = "Inostrana usluga",
+            Unit = "komad",
+            UnitPrice = 5.00M,
+            Quantity = 2,
+            Vat = new InvoiceItem.VatDetails
+            {
+                Rate = 0.00M,
+                ExemptionReason = "VAT_CL17" // Razlog izbjegavanja PDV-a
+            }
+        },
+        ...
+        new InvoiceItem
+        {
+            Name = "Pogrešna stavka",
+            Unit = "komad",
+            UnitPrice = 5.00M,
+            Quantity = -2 // U slučaju storniranja
         }
     },
-    Note = "Molimo vas da račun platite u navedenom roku. Hvala."
+    Note = "Molimo vas da račun platite u navedenom roku. Hvala.",
+    // U slučaju storniranja računa neophodno je poslati identifikator originalnog računa
+    //Type = InvoiceType.Corrective,
+    OriginalInvoice = new CreateInvoiceRequest.OriginalInvoiceDetails
+    {
+        Id = "0AE36859887129D6363C40F662FF9AE4",
+        IssuedAt = DateTime.Parse("2024-03-09T17:43:33Z")
+    }
 };
 
 var result = await invoiceService.CreateInvoiceAsync(request);

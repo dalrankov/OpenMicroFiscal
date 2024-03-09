@@ -3,7 +3,7 @@
 public sealed class FiscalizationSettings
 {
     public FiscalizationEnvironment Environment { get; set; }
-    public string IssuerIdType { get; set; }
+    public TaxIdType IssuerIdType { get; set; }
     public string IssuerIdNumber { get; set; }
     public string IssuerName { get; set; }
     public string IssuerAddress { get; set; }
