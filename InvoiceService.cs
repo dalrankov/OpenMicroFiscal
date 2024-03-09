@@ -125,7 +125,7 @@ public sealed class InvoiceService
                         VatPercentage = vatPercentageGroup.Key.RoundTo(2),
                         VatAmount = vatPercentageGroup.Sum(x => x.TotalVatAmount).RoundTo(2),
                         PriceBeforeVat = vatPercentageGroup.Sum(x => x.TotalPriceBeforeVat).RoundTo(2),
-                        TotalItems = vatPercentageGroup.Sum(x => x.Quantity)
+                        TotalItems = vatPercentageGroup.Count()
                     })
                     .ToList()
             }
