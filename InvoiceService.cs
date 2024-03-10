@@ -34,6 +34,7 @@ public sealed class InvoiceService
 
                 var resultItem = new Item
                 {
+                    Code = item.Code,
                     Name = item.Name,
                     Unit = item.Unit,
                     UnitPrice = item.UnitPrice.RoundTo(4),

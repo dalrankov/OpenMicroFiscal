@@ -5,6 +5,7 @@ namespace OpenMicroFiscal.Models;
 [XmlType("I")]
 public sealed class Item
 {
+    [XmlAttribute("C")] public string? Code { get; set; }
     [XmlAttribute("N")] public string Name { get; set; }
     [XmlAttribute("U")] public string Unit { get; set; }
     [XmlAttribute("UPB")] public decimal UnitPrice { get; set; }

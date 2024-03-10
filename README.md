@@ -111,7 +111,7 @@ var invoiceService = new InvoiceService(
 
 ----
 
-### Upotreba
+### Izdavanje računa
 
 ````csharp
 var request = new CreateInvoiceRequest
@@ -133,6 +133,7 @@ var request = new CreateInvoiceRequest
     {
         new InvoiceItem
         {
+            Code = "#guma",
             Name = "Guma za automobil",
             Unit = "komad",
             UnitPrice = 75.00M,
@@ -140,49 +141,86 @@ var request = new CreateInvoiceRequest
         },
         new InvoiceItem
         {
+            Code = "#burger",
             Name = "Burger",
             Unit = "komad",
             UnitPrice = 5.00M,
             Quantity = 2,
-            Vat = new InvoiceItem.VatDetails
+            Vat = new InvoiceItem.VatSpec
             {
                 Rate = 7.00M
             }
-        },
-        ...
-        new InvoiceItem
-        {
-            Name = "Inostrana usluga",
-            Unit = "komad",
-            UnitPrice = 5.00M,
-            Quantity = 2,
-            Vat = new InvoiceItem.VatDetails
-            {
-                Rate = 0.00M,
-                ExemptionReason = "VAT_CL17" // Razlog izbjegavanja PDV-a
-            }
-        },
-        ...
-        new InvoiceItem
-        {
-            Name = "Pogrešna stavka",
-            Unit = "komad",
-            UnitPrice = 5.00M,
-            Quantity = -2 // U slučaju storniranja
         }
     },
-    Note = "Molimo vas da račun platite u navedenom roku. Hvala.",
-    // U slučaju storniranja računa neophodno je poslati identifikator originalnog računa
-    //Type = InvoiceType.Corrective,
-    OriginalInvoice = new CreateInvoiceRequest.OriginalInvoiceDetails
+    Note = "Molimo vas da račun platite u navedenom roku. Hvala."
+};
+````
+
+### Storniranje računa
+
+````csharp
+var request = new CreateInvoiceRequest
+{
+    Type = InvoiceType.Corrective,
+    OrderNumber = 16,
+    PaymentMethod = PaymentMethodType.BankTransfer,
+    PaymentDeadline = new DateTime(2022, 02, 25),
+    Buyer = new Buyer
     {
-        Id = "0AE36859887129D6363C40F662FF9AE4",
+        IdType = TaxIdType.Tin,
+        IdNumber = "12345678",
+        Name = "TOP BUYER DOO",
+        Address = "4 JULA BB",
+        City = "PODGORICA",
+        Country = "MNE"
+    },
+    Items = new[]
+    {
+        new InvoiceItem
+        {
+            Code = "#guma",
+            Name = "Guma za automobil",
+            Unit = "komad",
+            UnitPrice = 75.00M,
+            Quantity = -4
+        },
+        new InvoiceItem
+        {
+            Code = "#burger",
+            Name = "Burger",
+            Unit = "komad",
+            UnitPrice = 5.00M,
+            Quantity = -2,
+            Vat = new InvoiceItem.VatSpec
+            {
+                Rate = 7.00M
+            }
+        }
+    },
+    Note = "Kupac je odustao od kupovine.",
+    Original = new CreateInvoiceRequest.OriginalInvoice
+    {
+        Id = "0AE36859887129D6363C40F662FF9AE4", // IIC
         IssuedAt = DateTime.Parse("2024-03-09T17:43:33Z")
     }
 };
+````
 
+### Izuzeće od plaćanja PDV-a stavke
+
+````csharp
+Vat = new InvoiceItem.VatSpec
+{
+    ExemptionReason = "VAT_CL17" // Razlog izuzeća
+}
+````
+
+### Rezultat
+
+````csharp
 var result = await invoiceService.CreateInvoiceAsync(request);
 
+Console.WriteLine($"XML: {result.EnvelopedRequestXmlText}");
 Console.WriteLine($"Invoice Number: {result.InvoiceNumber}");
 Console.WriteLine($"Total Price: {result.TotalPrice} EUR");
 Console.WriteLine($"IIC: {result.Iic}");
