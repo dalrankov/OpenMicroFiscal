@@ -18,6 +18,7 @@
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <PackageTags>Fiscalization;Montenegro;Invoices</PackageTags>
         <PackageIcon>icon.png</PackageIcon>
+        <PackageIconUrl />
 
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/dalrankov/OpenMicroFiscal</RepositoryUrl>
@@ -29,6 +30,7 @@
     <ItemGroup>
         <None Include="icon.png">
             <Pack>True</Pack>
+            <PackagePath />
         </None>
     </ItemGroup>
 
