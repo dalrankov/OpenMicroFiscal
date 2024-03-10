@@ -16,13 +16,21 @@
         <Copyright>© 2024 Dalibor Ranković</Copyright>
         <Description>.NET biblioteka za elektronsku fiskalizaciju računa u Crnoj Gori.</Description>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageTags>Fiscalization;Montenegro;Invoices</PackageTags>
+        <PackageIcon>icon.png</PackageIcon>
 
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/dalrankov/OpenMicroFiscal</RepositoryUrl>
         <PackageProjectUrl>https://github.com/dalrankov/OpenMicroFiscal</PackageProjectUrl>
 
-        <PackageReleaseNotes>Druga verzija u kojoj je moguće fiskalizovati standardne račune, sa izmijenjenom licencom.</PackageReleaseNotes>
+        <PackageReleaseNotes>Treća verzija u kojoj je moguće fiskalizovati standardne i korektivne račune. Ispravljena licenca, dodata ikonica paketa.</PackageReleaseNotes>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="icon.png">
+            <Pack>True</Pack>
+        </None>
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.2"/>

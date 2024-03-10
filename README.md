@@ -1,4 +1,4 @@
-# OpenMicroFiscal
+# <img align="center" src="https://raw.githubusercontent.com/dalrankov/OpenMicroFiscal/master/icon.png"/> OpenMicroFiscal
 
 <a href="https://www.nuget.org/packages/OpenMicroFiscal"><img alt="NuGet Version" src="https://img.shields.io/nuget/v/OpenMicroFiscal"></a>
 <a href="https://www.nuget.org/packages/OpenMicroFiscal"><img alt="NuGet Downloads" src="https://img.shields.io/nuget/dt/OpenMicroFiscal"></a>
