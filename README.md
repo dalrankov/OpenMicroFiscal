@@ -117,7 +117,8 @@ var request = new CreateInvoiceRequest
     OrderNumber = 15,
     PaymentMethod = PaymentMethodType.BankTransfer,
     BankNumber = "123-456-789",
-    PaymentDeadline = new DateTime(2022, 02, 25),
+    PaymentDeadline = new DateOnly(2022, 02, 25),
+    TaxDate = new DateOnly(2022, 02, 25),
     Buyer = new Buyer
     {
         IdType = TaxIdType.Tin,
@@ -163,7 +164,8 @@ var request = new CreateInvoiceRequest
     OrderNumber = 16,
     PaymentMethod = PaymentMethodType.BankTransfer,
     BankNumber = "123-456-789",
-    PaymentDeadline = new DateTime(2022, 02, 25),
+    PaymentDeadline = new DateOnly(2022, 02, 25),
+    TaxDate = new DateOnly(2022, 02, 25),
     Buyer = new Buyer
     {
         IdType = TaxIdType.Tin,
