@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Globalization;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
@@ -7,22 +8,11 @@ using OpenMicroFiscal.Models;
 
 namespace OpenMicroFiscal;
 
-public sealed class InvoiceService
+public sealed class InvoiceService(
+    HttpClient httpClient,
+    FiscalizationSettings settings,
+    ProvideCertificate provideCertificate)
 {
-    private readonly HttpClient _httpClient;
-    private readonly ProvideCertificate _provideCertificate;
-    private readonly FiscalizationSettings _settings;
-
-    public InvoiceService(
-        HttpClient httpClient,
-        FiscalizationSettings settings,
-        ProvideCertificate provideCertificate)
-    {
-        _httpClient = httpClient;
-        _settings = settings;
-        _provideCertificate = provideCertificate;
-    }
-
     public async Task<CreateInvoiceResult> CreateInvoiceAsync(
         CreateInvoiceRequest createInvoiceRequest,
         CancellationToken cancellationToken = default)
@@ -58,7 +48,7 @@ public sealed class InvoiceService
 
         var currentDateTime = DateTime.UtcNow.WithoutMilliseconds();
 
-        using var certificate = _provideCertificate();
+        using var certificate = provideCertificate();
 
         var (iicSignatureText, iicHashText) = ComputeIic(
             createInvoiceRequest.OrderNumber, currentDateTime, totalPrice, certificate);
@@ -81,42 +71,42 @@ public sealed class InvoiceService
                 TypeOfInvoice = TypeOfInvoice.NonCash,
                 IssuedAt = currentDateTime,
                 Number = string.Join("/",
-                    _settings.IssuerBusinessUnitCode,
+                    settings.IssuerBusinessUnitCode,
                     createInvoiceRequest.OrderNumber,
-                    currentDateTime.Year,
-                    _settings.IssuerEnuCode),
+                    createInvoiceRequest.TaxDate.Year,
+                    settings.IssuerEnuCode),
                 OrderNumber = createInvoiceRequest.OrderNumber,
-                EnuCode = _settings.IssuerEnuCode,
+                EnuCode = settings.IssuerEnuCode,
                 IsIssuerInVat = true,
                 TotalPriceWithoutVat = totalPriceWithoutVat,
                 TotalVatAmount = totalVatAmount,
                 TotalPrice = totalPrice,
-                OperatorCode = _settings.IssuerOperatorCode,
-                BusinessUnitCode = _settings.IssuerBusinessUnitCode,
-                SoftwareCode = _settings.IssuerSoftwareCode,
+                OperatorCode = settings.IssuerOperatorCode,
+                BusinessUnitCode = settings.IssuerBusinessUnitCode,
+                SoftwareCode = settings.IssuerSoftwareCode,
                 IssuerInvoiceCodeHash = iicHashText,
                 IssuerInvoiceCodeSignature = iicSignatureText,
-                TaxPeriod = $"{currentDateTime.Month:00}/{currentDateTime.Year}",
+                TaxPeriod = $"{createInvoiceRequest.TaxDate.Month:00}/{createInvoiceRequest.TaxDate.Year}",
                 Note = createInvoiceRequest.Note,
-                BankNumber = _settings.IssuerBankNumber,
-                PayDeadline = createInvoiceRequest.PaymentDeadline.ToString("yyyy-MM-dd"),
+                BankNumber = createInvoiceRequest.BankNumber,
+                PayDeadline = createInvoiceRequest.PaymentDeadline.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                 TotalPriceToPay = Math.Max(totalPrice, 0),
-                PaymentMethods = new List<PaymentMethod>
-                {
-                    new()
+                PaymentMethods =
+                [
+                    new PaymentMethod
                     {
                         Type = createInvoiceRequest.PaymentMethod,
                         Amount = totalPrice
                     }
-                },
+                ],
                 Seller = new Seller
                 {
-                    IdType = _settings.IssuerIdType,
-                    IdNumber = _settings.IssuerIdNumber,
-                    Name = _settings.IssuerName,
-                    Address = _settings.IssuerAddress,
-                    City = _settings.IssuerCity,
-                    Country = _settings.IssuerCountry
+                    IdType = settings.IssuerIdType,
+                    IdNumber = settings.IssuerIdNumber,
+                    Name = settings.IssuerName,
+                    Address = settings.IssuerAddress,
+                    City = settings.IssuerCity,
+                    Country = settings.IssuerCountry
                 },
                 Buyer = createInvoiceRequest.Buyer,
                 Items = invoiceItems,
@@ -149,11 +139,11 @@ public sealed class InvoiceService
         var envelopedRequestXmlText = requestXmlDocument.ToEnvelopedXmlText();
 
         using var httpRequest = new StringContent(envelopedRequestXmlText, Encoding.UTF8, "text/xml");
-        using var httpResult = await _httpClient
+        using var httpResult = await httpClient
             .PostAsync("fs-v1", httpRequest, cancellationToken)
             .ConfigureAwait(false);
 
-        var responseXmlText = await httpResult.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var responseXmlText = await httpResult.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         var responseXmlDocument = new XmlDocument();
         responseXmlDocument.LoadXml(responseXmlText);
 
@@ -173,13 +163,13 @@ public sealed class InvoiceService
 
         var urlQueryParams = new Dictionary<string, object>
         {
-            ["tin"] = _settings.IssuerIdNumber,
+            ["tin"] = settings.IssuerIdNumber,
             ["iic"] = iicHashText,
-            ["crtd"] = currentDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+            ["crtd"] = currentDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
             ["ord"] = createInvoiceRequest.OrderNumber,
-            ["bu"] = _settings.IssuerBusinessUnitCode,
-            ["cr"] = _settings.IssuerEnuCode,
-            ["sw"] = _settings.IssuerSoftwareCode,
+            ["bu"] = settings.IssuerBusinessUnitCode,
+            ["cr"] = settings.IssuerEnuCode,
+            ["sw"] = settings.IssuerSoftwareCode,
             ["prc"] = totalPrice.ToFormattedString(2)
         };
 
@@ -191,7 +181,7 @@ public sealed class InvoiceService
             EnvelopedRequestXmlText = envelopedRequestXmlText,
             Fic = responseBodyElement["RegisterInvoiceResponse"]!["FIC"]!.InnerText,
             VerificationUrl =
-                $"{UriProvider.GetInvoiceVerificationUri(_settings.Environment)}ic/#/verify?{queryString}",
+                $"{UriProvider.GetInvoiceVerificationUri(settings.Environment)}ic/#/verify?{queryString}",
             InvoiceNumber = request.Invoice.Number,
             Iic = iicHashText,
             TotalPrice = totalPrice,
@@ -206,22 +196,20 @@ public sealed class InvoiceService
         X509Certificate2 certificate)
     {
         var iicPlainText = string.Join("|",
-            _settings.IssuerIdNumber,
-            currentDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+            settings.IssuerIdNumber,
+            currentDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
             orderNumber,
-            _settings.IssuerBusinessUnitCode,
-            _settings.IssuerEnuCode,
-            _settings.IssuerSoftwareCode,
+            settings.IssuerBusinessUnitCode,
+            settings.IssuerEnuCode,
+            settings.IssuerSoftwareCode,
             totalPrice.ToFormattedString(2));
 
         var iicSignatureBytes = certificate
             .GetRSAPrivateKey()!
             .SignData(Encoding.UTF8.GetBytes(iicPlainText), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        var iicSignatureText = BitConverter.ToString(iicSignatureBytes).Replace("-", string.Empty);
-
-        using var md5 = MD5.Create();
-        var iicHashBytes = md5.ComputeHash(iicSignatureBytes);
-        var iicHashText = BitConverter.ToString(iicHashBytes).Replace("-", string.Empty);
+        var iicSignatureText = Convert.ToHexString(iicSignatureBytes);
+        var iicHashBytes = MD5.HashData(iicSignatureBytes);
+        var iicHashText = Convert.ToHexString(iicHashBytes);
 
         return (iicSignatureText, iicHashText);
     }

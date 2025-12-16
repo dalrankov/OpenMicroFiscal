@@ -2,6 +2,7 @@
 using System.Security.Cryptography.Xml;
 using System.Xml;
 using System.Xml.Linq;
+#pragma warning disable CS8670 // Object or collection initializer implicitly dereferences possibly null member.
 
 namespace OpenMicroFiscal.Extensions;
 
