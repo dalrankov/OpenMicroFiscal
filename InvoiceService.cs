@@ -185,7 +185,8 @@ public sealed class InvoiceService(
             InvoiceNumber = request.Invoice.Number,
             Iic = iicHashText,
             TotalPrice = totalPrice,
-            CreatedAt = currentDateTime
+            CreatedAt = currentDateTime,
+            TaxDate = createInvoiceRequest.TaxDate
         };
     }
 

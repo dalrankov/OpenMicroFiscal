@@ -10,5 +10,6 @@ public sealed class CreateInvoiceResult
     public string? VerificationUrl { get; set; }
     public decimal TotalPrice { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateOnly TaxDate { get; set; }
     public string? ErrorMessage { get; set; }
 }
