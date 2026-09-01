@@ -110,17 +110,19 @@ public sealed class InvoiceService(
                 },
                 Buyer = createInvoiceRequest.Buyer,
                 Items = invoiceItems,
-                SameTaxes = invoiceItems
-                    .GroupBy(item => new { item.VatPercentage, item.VatExemptionReason })
-                    .Select(vatPercentageGroup => new SameTax
-                    {
-                        VatPercentage = vatPercentageGroup.Key.VatPercentage.RoundTo(2),
-                        VatAmount = vatPercentageGroup.Sum(x => x.TotalVatAmount).RoundTo(2),
-                        PriceBeforeVat = vatPercentageGroup.Sum(x => x.TotalPriceBeforeVat).RoundTo(2),
-                        TotalItems = vatPercentageGroup.Count(),
-                        VatExemptionReason = vatPercentageGroup.Key.VatExemptionReason
-                    })
-                    .ToList(),
+                SameTaxes =
+                [
+                    .. invoiceItems
+                        .GroupBy(item => new { item.VatPercentage, item.VatExemptionReason })
+                        .Select(vatPercentageGroup => new SameTax
+                        {
+                            VatPercentage = vatPercentageGroup.Key.VatPercentage.RoundTo(2),
+                            VatAmount = vatPercentageGroup.Sum(x => x.TotalVatAmount).RoundTo(2),
+                            PriceBeforeVat = vatPercentageGroup.Sum(x => x.TotalPriceBeforeVat).RoundTo(2),
+                            TotalItems = vatPercentageGroup.Count(),
+                            VatExemptionReason = vatPercentageGroup.Key.VatExemptionReason
+                        })
+                ],
                 CorrectiveInvoice = createInvoiceRequest is { Type: InvoiceType.Corrective, Original: not null }
                     ? new CorrectiveInvoice
                     {
@@ -161,19 +163,19 @@ public sealed class InvoiceService(
                 CreatedAt = currentDateTime
             };
 
-        var urlQueryParams = new Dictionary<string, object>
+        var urlQueryParams = new Dictionary<string, string>
         {
             ["tin"] = settings.IssuerIdNumber,
             ["iic"] = iicHashText,
             ["crtd"] = currentDateTime.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
-            ["ord"] = createInvoiceRequest.OrderNumber,
+            ["ord"] = createInvoiceRequest.OrderNumber.ToString(CultureInfo.InvariantCulture),
             ["bu"] = settings.IssuerBusinessUnitCode,
             ["cr"] = settings.IssuerEnuCode,
             ["sw"] = settings.IssuerSoftwareCode,
             ["prc"] = totalPrice.ToFormattedString(2)
         };
 
-        var queryString = string.Join("&", urlQueryParams.Select(p => $"{p.Key}={p.Value}"));
+        var queryString = string.Join("&", urlQueryParams.Select(p => $"{p.Key}={Uri.EscapeDataString(p.Value)}"));
 
         return new CreateInvoiceResult
         {
@@ -205,8 +207,11 @@ public sealed class InvoiceService(
             settings.IssuerSoftwareCode,
             totalPrice.ToFormattedString(2));
 
-        var iicSignatureBytes = certificate
-            .GetRSAPrivateKey()!
+        using var privateKey =
+            certificate.GetRSAPrivateKey()
+            ?? throw new InvalidOperationException("Certificate does not contain an RSA private key.");
+
+        var iicSignatureBytes = privateKey
             .SignData(Encoding.UTF8.GetBytes(iicPlainText), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         var iicSignatureText = Convert.ToHexString(iicSignatureBytes);
         var iicHashBytes = MD5.HashData(iicSignatureBytes);

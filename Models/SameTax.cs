@@ -11,5 +11,8 @@ public sealed class SameTax
     [XmlAttribute("VATAmt")] public decimal VatAmount { get; set; }
     [XmlAttribute("ExemptFromVAT")] public string? VatExemptionReason { get; set; }
 
-    public bool ShouldSerializeVatPercentage() => VatPercentage > 0;
+    public bool ShouldSerializeVatPercentage()
+    {
+        return VatPercentage > 0;
+    }
 }

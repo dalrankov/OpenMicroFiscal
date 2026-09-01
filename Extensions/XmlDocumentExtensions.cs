@@ -2,6 +2,7 @@
 using System.Security.Cryptography.Xml;
 using System.Xml;
 using System.Xml.Linq;
+
 #pragma warning disable CS8670 // Object or collection initializer implicitly dereferences possibly null member.
 
 namespace OpenMicroFiscal.Extensions;
@@ -24,13 +25,17 @@ internal static class XmlDocumentExtensions
         keyInfo.AddClause(new KeyInfoX509Data(certificate));
 
         const string referenceUri = "#Request";
-        var reference = new Reference {Uri = referenceUri};
+        var reference = new Reference { Uri = referenceUri };
         reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
         reference.AddTransform(new XmlDsigExcC14NTransform());
 
+        using var privateKey =
+            certificate.GetRSAPrivateKey()
+            ?? throw new InvalidOperationException("Certificate does not contain an RSA private key.");
+
         var signedXml = new SignedXml(xmlDocument)
         {
-            SigningKey = certificate.GetRSAPrivateKey(),
+            SigningKey = privateKey,
             SignedInfo =
             {
                 CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl,
@@ -53,7 +58,7 @@ internal static class XmlDocumentExtensions
         const string headerElementName = "Header";
         const string bodyElementName = "Body";
 
-        var envelopeNamespace = (XNamespace) envelopeNamespaceUri;
+        var envelopeNamespace = (XNamespace)envelopeNamespaceUri;
 
         var envelopeElement = new XElement(envelopeNamespace + envelopeElementName,
             new XAttribute(XNamespace.Xmlns + soapEnvelopeAttributeName, envelopeNamespace),

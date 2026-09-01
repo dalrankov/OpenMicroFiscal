@@ -8,7 +8,7 @@ public sealed class InvoiceItem
     public decimal UnitPrice { get; set; }
     public decimal Quantity { get; set; }
     public VatSpec? Vat { get; set; }
-    
+
     public sealed class VatSpec
     {
         public decimal Rate { get; set; }

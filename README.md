@@ -3,9 +3,9 @@
 <a href="https://www.nuget.org/packages/OpenMicroFiscal"><img alt="NuGet Version" src="https://img.shields.io/nuget/v/OpenMicroFiscal"></a>
 <a href="https://www.nuget.org/packages/OpenMicroFiscal"><img alt="NuGet Downloads" src="https://img.shields.io/nuget/dt/OpenMicroFiscal"></a>
 
-Softver namijenjen za elektronsku fiskalizaciju računa pravnih lica u PDV sistemu unutar Crne Gore.
-Implementacija je minimalistička i služi za izdavanje/storniranje računa ka pravnim licima (biznisima) koji plaćaju transakcionim
-računom ili kreditnom/debitnom karticom firme.
+Softver namijenjen za elektronsku fiskalizaciju računa pravnih lica u PDV sistemu unutar Crne Gore. Implementacija je
+minimalistička i služi za izdavanje/storniranje računa ka pravnim licima (biznisima) koji plaćaju transakcionim računom
+ili kreditnom/debitnom karticom firme.
 
 Pored toga što služi svrsi koja je meni konkretno potrebna, može biti i kvalitetna osnova drugima koji žele da
 implementiraju elektronsku fiskalizaciju u .NET-u.
@@ -39,10 +39,10 @@ FiscalizationSettings__IssuerOperatorCode=oo123oo123
 ````
 
 Zatim pozovite ekstenziju `AddFiscalization` koja će registrovati neophodne servise za fiskalizaciju. Ovdje ste dužni da
-predate implementaciju delegate-a koja kao rezultat vraća sertifikat. Kao parametar funkcije dostupna vam je
-instanca `IServiceProvider` interfejsa (koja je u ovom slučaju odbačena nazivom `_`) koja vam može pomoći u
-instanciranju sertifikata. Npr: Ukoliko sertifikat držite u konfiguraciji i želite odatle da ga ekstraktujete kako biste
-ga iskoristili ovdje.
+predate implementaciju delegate-a koja kao rezultat vraća sertifikat. Kao parametar funkcije dostupna vam je instanca
+`IServiceProvider` interfejsa (koja je u ovom slučaju odbačena nazivom `_`) koja vam može pomoći u instanciranju
+sertifikata. Npr: Ukoliko sertifikat držite u konfiguraciji i želite odatle da ga ekstraktujete kako biste ga
+iskoristili ovdje.
 
 ````csharp
 services.AddFiscalization(_ => () => new X509Certificate2("test.pfx", "123456"));
