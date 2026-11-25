@@ -7,10 +7,15 @@ Softver namijenjen za elektronsku fiskalizaciju računa pravnih lica u PDV siste
 minimalistička i služi za izdavanje/storniranje računa ka pravnim licima (biznisima) koji plaćaju transakcionim računom
 ili kreditnom/debitnom karticom firme.
 
-Pored toga što služi svrsi koja je meni konkretno potrebna, može biti i kvalitetna osnova drugima koji žele da
-implementiraju elektronsku fiskalizaciju u .NET-u.
+Može biti kvalitetna osnova drugima koji žele da implementiraju elektronsku fiskalizaciju u .NET-u.
 
 ## Kako se koristi biblioteka?
+
+Biblioteka cilja .NET 11 (`net11.0`) i instalira se kroz NuGet:
+
+````shell
+dotnet add package OpenMicroFiscal
+````
 
 Testni sertifikat možete pronaći u folderu `test-certs` pod nazivom `test.pfx`. Lozinka je `123456`.
 
@@ -45,8 +50,12 @@ sertifikata. Npr: Ukoliko sertifikat držite u konfiguraciji i želite odatle da
 iskoristili ovdje.
 
 ````csharp
-services.AddFiscalization(_ => () => new X509Certificate2("test.pfx", "123456"));
+services.AddFiscalization(_ => () => X509CertificateLoader.LoadPkcs12FromFile("test.pfx", "123456"));
 ````
+
+> Delegate se poziva pri svakom izdavanju računa, a `InvoiceService` dispose-uje vraćeni sertifikat čim završi. Zato
+> delegate uvijek mora da vrati novu instancu sertifikata. Keširana instanca prestaje da radi već kod drugog računa.
+> Ovo važi za sva tri načina registracije.
 
 Nakon ovoga je uspješno registrovan servis tipa `InvoiceService`, spreman za upotrebu.
 
@@ -71,7 +80,7 @@ services.AddFiscalization(
         IssuerBusinessUnitCode = "xx123xx123",
         IssuerOperatorCode = "oo123oo123"
     }, 
-    () => new X509Certificate2("test.pfx", "123456"));
+    () => X509CertificateLoader.LoadPkcs12FromFile("test.pfx", "123456"));
 ````
 
 Nakon ovoga je uspješno registrovan servis tipa `InvoiceService`, spreman za upotrebu.
@@ -85,7 +94,8 @@ Klasa `InvoiceService` je dizajnirana tako da se može instancirati po potrebi, 
 
 ````csharp
 using var httpClient = new HttpClient();
-httpClient.BaseAddress = new Uri("Base adresa do servisa za fiskalizaciju");
+// Test: https://efitest.tax.gov.me/ | Produkcija: https://efi.tax.gov.me/
+httpClient.BaseAddress = new Uri("https://efitest.tax.gov.me/");
 
 var invoiceService = new InvoiceService(
     httpClient,
@@ -103,7 +113,7 @@ var invoiceService = new InvoiceService(
         IssuerBusinessUnitCode = "xx123xx123",
         IssuerOperatorCode = "oo123oo123"
     },
-    () => new X509Certificate2("test.pfx", "123456"));
+    () => X509CertificateLoader.LoadPkcs12FromFile("test.pfx", "123456"));
 ````
 
 ----
@@ -202,7 +212,7 @@ var request = new CreateInvoiceRequest
     Original = new CreateInvoiceRequest.OriginalInvoice
     {
         Id = "0AE36859887129D6363C40F662FF9AE4", // IIC
-        IssuedAt = DateTime.Parse("2024-03-09T17:43:33Z")
+        IssuedAt = DateTime.Parse("2024-03-09T17:43:33Z") // CreatedAt originalnog računa
     }
 };
 ````
@@ -221,11 +231,19 @@ Vat = new InvoiceItem.VatSpec
 ````csharp
 var result = await invoiceService.CreateInvoiceAsync(request);
 
+if (!result.IsSuccessful)
+{
+    // Fic i VerificationUrl su null kada poreska uprava odbije račun
+    Console.WriteLine($"Greška: {result.ErrorMessage}");
+    return;
+}
+
 Console.WriteLine($"XML: {result.EnvelopedRequestXmlText}");
 Console.WriteLine($"Invoice Number: {result.InvoiceNumber}");
 Console.WriteLine($"Total Price: {result.TotalPrice} EUR");
 Console.WriteLine($"IIC: {result.Iic}");
 Console.WriteLine($"FIC: {result.Fic}");
 Console.WriteLine($"Date and time: {result.CreatedAt}");
+Console.WriteLine($"Tax date: {result.TaxDate}");
 Console.WriteLine($"Verification URL: {result.VerificationUrl}");
 ````
